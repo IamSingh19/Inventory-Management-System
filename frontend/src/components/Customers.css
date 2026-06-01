@@ -1,0 +1,10 @@
+.customers {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.customers h2 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}

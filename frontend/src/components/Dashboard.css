@@ -1,0 +1,10 @@
+.dashboard {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.dashboard h2 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}

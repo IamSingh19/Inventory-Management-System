@@ -1,0 +1,31 @@
+.orders {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.orders h2 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.items {
+  margin: 15px 0;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.item-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.item-row select,
+.item-row input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}

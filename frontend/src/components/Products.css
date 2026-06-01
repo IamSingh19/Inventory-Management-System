@@ -1,0 +1,10 @@
+.products {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.products h2 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
