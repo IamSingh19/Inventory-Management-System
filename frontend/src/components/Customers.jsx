@@ -44,6 +44,11 @@ export default function Customers() {
       return;
     }
 
+    if (!/^\d+$/.test(form.phone.trim())) {
+      setError('Phone number must contain only numeric digits');
+      return;
+    }
+
     try {
       await customerAPI.create({
         name: form.name.trim(),
@@ -97,7 +102,10 @@ export default function Customers() {
           type="tel"
           placeholder="Phone"
           value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, '');
+            setForm({ ...form, phone: val });
+          }}
           required
         />
         <button type="submit">Add Customer</button>
