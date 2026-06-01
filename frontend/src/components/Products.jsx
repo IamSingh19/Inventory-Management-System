@@ -128,13 +128,9 @@ export default function Products() {
           type="number"
           placeholder="Price"
           value={form.price}
-          onChange={(e) => {
-            const val = e.target.value === '' ? '' : Math.max(0.01, parseFloat(e.target.value) || 0);
-            setForm({ ...form, price: val });
-          }}
+          onChange={(e) => setForm({ ...form, price: e.target.value })}
           required
           step="0.01"
-          min="0.01"
         />
         <input
           type="number"
