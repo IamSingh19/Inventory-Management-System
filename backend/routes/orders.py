@@ -77,7 +77,8 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
     
     for item in order.items:
         product = db.query(Product).filter(Product.id == item.product_id).first()
-        product.quantity += item.quantity
+        if product:
+            product.quantity += item.quantity
     
     db.delete(order)
     db.commit()
