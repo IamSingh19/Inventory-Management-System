@@ -23,6 +23,7 @@ wheels/
 *.egg
 .env
 .env.local
+.env.*.local
 node_modules/
 dist/
 build/
@@ -30,3 +31,10 @@ build/
 *.log
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
