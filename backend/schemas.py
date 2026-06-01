@@ -6,12 +6,12 @@ class ProductCreate(BaseModel):
     name: str
     sku: str
     price: float = Field(gt=0)
-    quantity: int = Field(ge=0)
+    quantity: int = Field(gt=0)
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     price: Optional[float] = Field(None, gt=0)
-    quantity: Optional[int] = Field(None, ge=0)
+    quantity: Optional[int] = Field(None, gt=0)
 
 class ProductResponse(BaseModel):
     id: int

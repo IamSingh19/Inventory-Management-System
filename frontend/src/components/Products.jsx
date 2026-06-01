@@ -61,8 +61,8 @@ export default function Products() {
       return;
     }
     
-    if (Number.isNaN(quantity) || quantity < 0) {
-      setError('Quantity cannot be negative');
+    if (Number.isNaN(quantity) || quantity <= 0) {
+      setError('Quantity must be greater than 0');
       return;
     }
     
@@ -120,7 +120,7 @@ export default function Products() {
       <h2>Products</h2>
       {error && <div className="error">{error}</div>}
       
-      <form onSubmit={handleSubmit} className="form">
+      <form onSubmit={handleSubmit} className="form" noValidate>
         <input
           type="text"
           placeholder="Product Name"
@@ -154,11 +154,11 @@ export default function Products() {
           value={form.quantity}
           onChange={(e) => setForm({ ...form, quantity: e.target.value })}
           onBlur={(e) => {
-            const val = Math.max(0, parseInt(e.target.value) || 0);
+            const val = e.target.value === '' ? '' : parseInt(e.target.value, 10) || 0;
             setForm({ ...form, quantity: val });
           }}
           required
-          min="0"
+          min="1"
         />
         <button type="submit">{editing ? 'Update' : 'Add'} Product</button>
         {editing && <button type="button" onClick={() => { setEditing(null); setForm({ name: '', sku: '', price: '', quantity: '' }); }}>Cancel</button>}
