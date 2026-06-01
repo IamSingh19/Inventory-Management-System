@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { customerAPI } from '../api';
+import { getErrorMessage } from '../utils/errors';
 import './Customers.css';
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     loadCustomers();
@@ -14,32 +16,58 @@ export default function Customers() {
   const loadCustomers = async () => {
     try {
       const res = await customerAPI.getAll();
-      setCustomers(res.data);
+      setCustomers(Array.isArray(res.data) ? res.data : []);
       setError('');
     } catch (err) {
       setError('Failed to load customers');
+      setCustomers([]);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!form.name.trim()) {
+      setError('Full name is required');
+      return;
+    }
+
+    if (!form.email.trim()) {
+      setError('Email is required');
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      setError('Phone number is required');
+      return;
+    }
+
     try {
-      await customerAPI.create(form);
+      await customerAPI.create({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim()
+      });
       setForm({ name: '', email: '', phone: '' });
-      loadCustomers();
-      setError('');
+      await loadCustomers();
+      setSuccess('Customer added successfully');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error saving customer');
+      setError(getErrorMessage(err, 'Error saving customer'));
     }
   };
 
   const handleDelete = async (id) => {
     if (confirm('Delete this customer?')) {
+      setError('');
+      setSuccess('');
       try {
         await customerAPI.delete(id);
-        loadCustomers();
+        await loadCustomers();
+        setSuccess('Customer deleted successfully');
       } catch (err) {
-        setError('Failed to delete customer');
+        setError(getErrorMessage(err, 'Failed to delete customer'));
       }
     }
   };
@@ -48,8 +76,9 @@ export default function Customers() {
     <div className="customers">
       <h2>Customers</h2>
       {error && <div className="error">{error}</div>}
+      {success && <div className="success">{success}</div>}
       
-      <form onSubmit={handleSubmit} className="form">
+      <form onSubmit={handleSubmit} className="form" noValidate>
         <input
           type="text"
           placeholder="Full Name"

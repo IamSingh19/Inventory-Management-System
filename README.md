@@ -1,15 +1,15 @@
 # Inventory & Order Management System
 
-A production-ready full-stack application for managing products, customers, and orders with a React frontend, FastAPI backend, and PostgreSQL database.
+A production-ready full-stack application for managing products, customers, orders, and inventory with a React frontend, FastAPI backend, and PostgreSQL database.
 
 ## Features
 
-- **Product Management**: Create, read, update, delete products with SKU and inventory tracking
-- **Customer Management**: Manage customer information with unique email validation
-- **Order Management**: Create orders with automatic stock deduction and total calculation
-- **Dashboard**: Real-time statistics including low stock alerts
-- **Responsive UI**: Mobile-friendly interface with clean design
-- **Docker Containerization**: Full Docker and Docker Compose setup for easy deployment
+- **Product Management**: Create, read, update, and delete products with SKU and inventory tracking.
+- **Customer Management**: Create, list, view, and delete customers with unique email validation.
+- **Order Management**: Create, view, and cancel orders with automatic stock deduction and total calculation.
+- **Dashboard**: Summary statistics for products, customers, orders, and low-stock products.
+- **Responsive UI**: Mobile-friendly interface with form validation, error messages, and success messages.
+- **Docker Containerization**: Full Docker and Docker Compose setup for local and deployment workflows.
 
 ## Tech Stack
 
@@ -21,23 +21,27 @@ A production-ready full-stack application for managing products, customers, and 
 ## Local Development
 
 ### Prerequisites
-- Docker and Docker Compose installed
+
+- Docker and Docker Compose
 - Or: Python 3.11+, Node.js 18+, PostgreSQL 15+
 
-### Using Docker Compose (Recommended)
+### Using Docker Compose
 
 ```bash
+cp .env.example .env
 docker-compose up --build
 ```
 
-Access the application:
-- Frontend: https://vercel.com/jitendra-singhs-projects-8e47a885/inventory-management-system/EGp9Lw5wkheKHnhByjvpW5E7nWZJ
-- Backend API: https://inventory-management-sys-b6po.onrender.com
-- API Docs: https://inventory-management-sys-b6po.onrender.com/docs
+Access the local application:
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
 ### Manual Setup
 
-**Backend:**
+Backend:
+
 ```bash
 cd backend
 python -m venv venv
@@ -47,7 +51,8 @@ cp .env.example .env
 uvicorn main:app --reload
 ```
 
-**Frontend:**
+Frontend:
+
 ```bash
 cd frontend
 npm install
@@ -55,9 +60,18 @@ cp .env.example .env
 npm run dev
 ```
 
+## Deployment Links
+
+- GitHub Repository: https://github.com/IamSingh19/etharaAi-project
+- Live Frontend: replace with your public Vercel/Netlify app URL
+- Live Backend API: https://inventory-management-sys-b6po.onrender.com
+- Live API Docs: https://inventory-management-sys-b6po.onrender.com/docs
+- Docker Hub Backend Image: replace with your Docker Hub backend image URL
+
 ## API Endpoints
 
 ### Products
+
 - `POST /products` - Create product
 - `GET /products` - List all products
 - `GET /products/{id}` - Get product details
@@ -65,59 +79,78 @@ npm run dev
 - `DELETE /products/{id}` - Delete product
 
 ### Customers
+
 - `POST /customers` - Create customer
 - `GET /customers` - List all customers
 - `GET /customers/{id}` - Get customer details
 - `DELETE /customers/{id}` - Delete customer
 
 ### Orders
+
 - `POST /orders` - Create order
 - `GET /orders` - List all orders
 - `GET /orders/{id}` - Get order details
 - `DELETE /orders/{id}` - Cancel order
 
 ### Stats
+
 - `GET /stats` - Get dashboard statistics
 - `GET /health` - Health check
 
 ## Business Logic
 
-- Product SKU must be unique
-- Customer email must be unique
-- Product quantity cannot be negative
-- Orders cannot be placed if inventory is insufficient
-- Creating an order automatically reduces available stock
-- Order total is calculated automatically by the backend
-- Canceling an order restores stock
+- Product SKU must be unique.
+- Customer email must be unique.
+- Product quantity must be greater than 0.
+- Orders cannot be placed if inventory is insufficient.
+- Creating an order automatically reduces available stock.
+- Order total is calculated automatically by the backend.
+- Canceling an order restores stock.
+- APIs validate request data and return appropriate HTTP status codes.
 
+## Environment Variables
+
+The project uses environment variables for database, API, and CORS configuration. Copy `.env.example` to `.env` for Docker Compose, and configure hosting-provider environment variables for deployed services.
+
+Required variables:
+
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DB`
+- `DATABASE_URL`
+- `SECRET_KEY`
+- `CORS_ORIGINS`
+- `VITE_API_URL`
 
 ## Project Structure
 
-```
+```text
 .
-├── backend/
-│   ├── main.py           # FastAPI app
-│   ├── models.py         # SQLAlchemy models
-│   ├── schemas.py        # Pydantic schemas
-│   ├── database.py       # Database configuration
-│   ├── routes/           # API route handlers
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   └── .dockerignore
-├── frontend/
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── api.js        # API client
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── package.json
-│   ├── Dockerfile
-│   └── .dockerignore
-├── docker-compose.yml
-└── README.md
+|-- backend/
+|   |-- main.py
+|   |-- models.py
+|   |-- schemas.py
+|   |-- database.py
+|   |-- routes/
+|   |-- requirements.txt
+|   |-- Dockerfile
+|   `-- .dockerignore
+|-- frontend/
+|   |-- src/
+|   |   |-- components/
+|   |   |-- utils/
+|   |   |-- api.js
+|   |   |-- App.jsx
+|   |   |-- main.jsx
+|   |   `-- index.css
+|   |-- index.html
+|   |-- vite.config.js
+|   |-- package.json
+|   |-- Dockerfile
+|   `-- .dockerignore
+|-- .env.example
+|-- docker-compose.yml
+`-- README.md
 ```
 
 ## License

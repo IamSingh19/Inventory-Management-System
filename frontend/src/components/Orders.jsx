@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { orderAPI, customerAPI, productAPI } from '../api';
+import { getErrorMessage } from '../utils/errors';
 import './Orders.css';
 
 export default function Orders() {
@@ -8,7 +9,10 @@ export default function Orders() {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ customer_id: '', items: [{ product_id: '', quantity: '' }] });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orderDetailsLoading, setOrderDetailsLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -53,31 +57,75 @@ export default function Orders() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    const customerId = Number.parseInt(form.customer_id, 10);
+    if (Number.isNaN(customerId)) {
+      setError('Customer is required');
+      return;
+    }
+
+    const items = form.items.map(item => ({
+      product_id: Number.parseInt(item.product_id, 10),
+      quantity: Number.parseInt(item.quantity, 10)
+    }));
+
+    if (items.some(item => Number.isNaN(item.product_id))) {
+      setError('Product is required for every order item');
+      return;
+    }
+
+    if (items.some(item => Number.isNaN(item.quantity) || item.quantity <= 0)) {
+      setError('Quantity must be greater than 0 for every order item');
+      return;
+    }
+
     try {
-      const items = form.items.map(item => ({
-        product_id: parseInt(item.product_id),
-        quantity: parseInt(item.quantity)
-      }));
       await orderAPI.create({
-        customer_id: parseInt(form.customer_id),
+        customer_id: customerId,
         items
       });
       setForm({ customer_id: '', items: [{ product_id: '', quantity: '' }] });
       await loadOrders();
-      setError('');
+      await loadProducts();
+      setSelectedOrder(null);
+      setSuccess('Order created successfully');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error creating order');
+      setError(getErrorMessage(err, 'Error creating order'));
     }
   };
 
   const handleDelete = async (id) => {
     if (confirm('Cancel this order?')) {
+      setError('');
+      setSuccess('');
       try {
         await orderAPI.delete(id);
         await loadOrders();
+        await loadProducts();
+        if (selectedOrder?.id === id) {
+          setSelectedOrder(null);
+        }
+        setSuccess('Order canceled successfully');
       } catch (err) {
-        setError('Failed to delete order');
+        setError(getErrorMessage(err, 'Failed to delete order'));
       }
+    }
+  };
+
+  const handleViewDetails = async (id) => {
+    setError('');
+    setSuccess('');
+    setOrderDetailsLoading(true);
+
+    try {
+      const res = await orderAPI.getById(id);
+      setSelectedOrder(res.data);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to load order details'));
+    } finally {
+      setOrderDetailsLoading(false);
     }
   };
 
@@ -91,6 +139,16 @@ export default function Orders() {
     setForm({ ...form, items: [...form.items, { product_id: '', quantity: '' }] });
   };
 
+  const getCustomerName = (customerId) => {
+    return customers.find(customer => customer.id === customerId)?.name || 'Unknown';
+  };
+
+  const getProductName = (productId) => {
+    return products.find(product => product.id === productId)?.name || `Product #${productId}`;
+  };
+
+  const formatCurrency = (amount) => `$${Number(amount || 0).toFixed(2)}`;
+
   if (loading) {
     return <div className="orders"><p>Loading...</p></div>;
   }
@@ -99,8 +157,9 @@ export default function Orders() {
     <div className="orders">
       <h2>Orders</h2>
       {error && <div className="error">{error}</div>}
+      {success && <div className="success">{success}</div>}
       
-      <form onSubmit={handleSubmit} className="form">
+      <form onSubmit={handleSubmit} className="form" noValidate>
         <select
           value={form.customer_id}
           onChange={(e) => setForm({ ...form, customer_id: e.target.value })}
@@ -156,10 +215,11 @@ export default function Orders() {
             orders.map((o) => (
               <tr key={o.id}>
                 <td>#{o.id}</td>
-                <td>{customers && customers.find(c => c.id === o.customer_id)?.name || 'Unknown'}</td>
-                <td>${o.total_amount ? o.total_amount.toFixed(2) : '0.00'}</td>
+                <td>{getCustomerName(o.customer_id)}</td>
+                <td>{formatCurrency(o.total_amount)}</td>
                 <td>{o.items ? o.items.length : 0}</td>
                 <td>
+                  <button onClick={() => handleViewDetails(o.id)}>View Details</button>
                   <button onClick={() => handleDelete(o.id)}>Cancel</button>
                 </td>
               </tr>
@@ -171,6 +231,46 @@ export default function Orders() {
           )}
         </tbody>
       </table>
+
+      {orderDetailsLoading && <div className="details-panel">Loading order details...</div>}
+
+      {selectedOrder && !orderDetailsLoading && (
+        <section className="details-panel">
+          <div className="details-header">
+            <div>
+              <h3>Order #{selectedOrder.id}</h3>
+              <p>{getCustomerName(selectedOrder.customer_id)}</p>
+            </div>
+            <button type="button" onClick={() => setSelectedOrder(null)}>Close</button>
+          </div>
+
+          <div className="details-summary">
+            <span>Total: {formatCurrency(selectedOrder.total_amount)}</span>
+            <span>Items: {selectedOrder.items?.length || 0}</span>
+          </div>
+
+          <table className="details-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Line Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(selectedOrder.items || []).map((item) => (
+                <tr key={item.id}>
+                  <td>{getProductName(item.product_id)}</td>
+                  <td>{item.quantity}</td>
+                  <td>{formatCurrency(item.price)}</td>
+                  <td>{formatCurrency(item.price * item.quantity)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
     </div>
   );
 }

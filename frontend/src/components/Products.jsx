@@ -1,33 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { productAPI } from '../api';
+import { getErrorMessage } from '../utils/errors';
 import './Products.css';
-
-const getErrorMessage = (err, fallback) => {
-  const detail = err?.response?.data?.detail;
-
-  if (typeof detail === 'string') {
-    return detail;
-  }
-
-  if (Array.isArray(detail)) {
-    return detail
-      .map((item) => item?.msg || item?.message)
-      .filter(Boolean)
-      .join(', ') || fallback;
-  }
-
-  if (detail && typeof detail === 'object') {
-    return detail.msg || detail.message || fallback;
-  }
-
-  return fallback;
-};
 
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ name: '', sku: '', price: '', quantity: '' });
   const [editing, setEditing] = useState(null);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     loadProducts();
@@ -47,6 +28,7 @@ export default function Products() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     
     const quantity = Number.parseInt(form.quantity, 10);
     const price = parseFloat(form.price) || 0;
@@ -82,8 +64,10 @@ export default function Products() {
       if (editing) {
         await productAPI.update(editing, submitData);
         setEditing(null);
+        setSuccess('Product updated successfully');
       } else {
         await productAPI.create(submitData);
+        setSuccess('Product added successfully');
       }
       
       setForm({ name: '', sku: '', price: '', quantity: '' });
@@ -106,9 +90,12 @@ export default function Products() {
 
   const handleDelete = async (id) => {
     if (confirm('Delete this product?')) {
+      setError('');
+      setSuccess('');
       try {
         await productAPI.delete(id);
         await loadProducts();
+        setSuccess('Product deleted successfully');
       } catch (err) {
         setError(getErrorMessage(err, 'Failed to delete product'));
       }
@@ -119,6 +106,7 @@ export default function Products() {
     <div className="products">
       <h2>Products</h2>
       {error && <div className="error">{error}</div>}
+      {success && <div className="success">{success}</div>}
       
       <form onSubmit={handleSubmit} className="form" noValidate>
         <input
