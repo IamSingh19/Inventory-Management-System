@@ -42,7 +42,17 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db)):
 @router.get("")
 def get_orders(db: Session = Depends(get_db)):
     orders = db.query(Order).all()
-    return [{"id": o.id, "customer_id": o.customer_id, "total_amount": o.total_amount, "created_at": o.created_at} for o in orders]
+    result = []
+    for o in orders:
+        items = [{"id": i.id, "product_id": i.product_id, "quantity": i.quantity, "price": i.price} for i in o.items]
+        result.append({
+            "id": o.id,
+            "customer_id": o.customer_id,
+            "total_amount": o.total_amount,
+            "created_at": o.created_at,
+            "items": items
+        })
+    return result
 
 @router.get("/{order_id}")
 def get_order(order_id: int, db: Session = Depends(get_db)):

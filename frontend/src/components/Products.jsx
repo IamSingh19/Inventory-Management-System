@@ -2,6 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { productAPI } from '../api';
 import './Products.css';
 
+const getErrorMessage = (err, fallback) => {
+  const detail = err?.response?.data?.detail;
+
+  if (typeof detail === 'string') {
+    return detail;
+  }
+
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => item?.msg || item?.message)
+      .filter(Boolean)
+      .join(', ') || fallback;
+  }
+
+  if (detail && typeof detail === 'object') {
+    return detail.msg || detail.message || fallback;
+  }
+
+  return fallback;
+};
+
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ name: '', sku: '', price: '', quantity: '' });
@@ -15,32 +36,71 @@ export default function Products() {
   const loadProducts = async () => {
     try {
       const res = await productAPI.getAll();
-      setProducts(res.data);
+      setProducts(res.data || []);
       setError('');
     } catch (err) {
-      setError('Failed to load products');
+      console.error('Load error:', err);
+      setProducts([]);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
+    const quantity = Number.parseInt(form.quantity, 10);
+    const price = parseFloat(form.price) || 0;
+    
+    if (!form.name.trim()) {
+      setError('Product name is required');
+      return;
+    }
+    
+    if (!form.sku.trim()) {
+      setError('SKU is required');
+      return;
+    }
+    
+    if (Number.isNaN(quantity) || quantity < 0) {
+      setError('Quantity cannot be negative');
+      return;
+    }
+    
+    if (price <= 0) {
+      setError('Price must be greater than 0');
+      return;
+    }
+    
+    const submitData = {
+      name: form.name.trim(),
+      sku: form.sku.trim(),
+      price,
+      quantity
+    };
+
     try {
       if (editing) {
-        await productAPI.update(editing, form);
+        await productAPI.update(editing, submitData);
         setEditing(null);
       } else {
-        await productAPI.create(form);
+        await productAPI.create(submitData);
       }
+      
       setForm({ name: '', sku: '', price: '', quantity: '' });
-      loadProducts();
-      setError('');
+      await loadProducts();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error saving product');
+      console.error('Submit error:', err);
+      setError(getErrorMessage(err, 'Error saving product'));
     }
   };
 
   const handleEdit = (product) => {
-    setForm(product);
+    setForm({
+      name: product.name,
+      sku: product.sku,
+      price: product.price,
+      quantity: product.quantity
+    });
     setEditing(product.id);
   };
 
@@ -48,9 +108,9 @@ export default function Products() {
     if (confirm('Delete this product?')) {
       try {
         await productAPI.delete(id);
-        loadProducts();
+        await loadProducts();
       } catch (err) {
-        setError('Failed to delete product');
+        setError(getErrorMessage(err, 'Failed to delete product'));
       }
     }
   };
@@ -80,20 +140,28 @@ export default function Products() {
           type="number"
           placeholder="Price"
           value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
+          onChange={(e) => {
+            const val = e.target.value === '' ? '' : Math.max(0.01, parseFloat(e.target.value) || 0);
+            setForm({ ...form, price: val });
+          }}
           required
           step="0.01"
+          min="0.01"
         />
         <input
           type="number"
           placeholder="Quantity"
           value={form.quantity}
-          onChange={(e) => setForm({ ...form, quantity: Math.max(0, parseInt(e.target.value) || 0) })}
+          onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+          onBlur={(e) => {
+            const val = Math.max(0, parseInt(e.target.value) || 0);
+            setForm({ ...form, quantity: val });
+          }}
           required
           min="0"
         />
         <button type="submit">{editing ? 'Update' : 'Add'} Product</button>
-        {editing && <button type="button" onClick={() => { setEditing(null); setForm({}); }}>Cancel</button>}
+        {editing && <button type="button" onClick={() => { setEditing(null); setForm({ name: '', sku: '', price: '', quantity: '' }); }}>Cancel</button>}
       </form>
 
       <table>
