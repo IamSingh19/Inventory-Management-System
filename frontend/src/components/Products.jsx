@@ -88,8 +88,9 @@ export default function Products() {
           type="number"
           placeholder="Quantity"
           value={form.quantity}
-          onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+          onChange={(e) => setForm({ ...form, quantity: Math.max(0, parseInt(e.target.value) || 0) })}
           required
+          min="0"
         />
         <button type="submit">{editing ? 'Update' : 'Add'} Product</button>
         {editing && <button type="button" onClick={() => { setEditing(null); setForm({}); }}>Cancel</button>}
