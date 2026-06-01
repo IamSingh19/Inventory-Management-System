@@ -31,9 +31,9 @@ docker-compose up --build
 ```
 
 Access the application:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+- Frontend: https://vercel.com/jitendra-singhs-projects-8e47a885/inventory-management-system/EGp9Lw5wkheKHnhByjvpW5E7nWZJ
+- Backend API: https://inventory-management-sys-b6po.onrender.com
+- API Docs: https://inventory-management-sys-b6po.onrender.com/docs
 
 ### Manual Setup
 
@@ -90,23 +90,6 @@ npm run dev
 - Order total is calculated automatically by the backend
 - Canceling an order restores stock
 
-## Deployment
-
-### Backend (Render)
-1. Push code to GitHub
-2. Create new Web Service on Render
-3. Connect GitHub repository
-4. Set environment variables:
-   - `DATABASE_URL`: PostgreSQL connection string
-   - `SECRET_KEY`: Random secret key
-5. Deploy
-
-### Frontend (Vercel)
-1. Push code to GitHub
-2. Import project in Vercel
-3. Set environment variable:
-   - `VITE_API_URL`: Backend API URL
-4. Deploy
 
 ## Project Structure
 
