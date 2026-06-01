@@ -8,38 +8,46 @@ export default function Orders() {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ customer_id: '', items: [{ product_id: '', quantity: '' }] });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadOrders();
-    loadCustomers();
-    loadProducts();
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([loadOrders(), loadCustomers(), loadProducts()]);
+      setLoading(false);
+    };
+    loadData();
   }, []);
 
   const loadOrders = async () => {
     try {
       const res = await orderAPI.getAll();
-      setOrders(res.data);
+      setOrders(Array.isArray(res.data) ? res.data : []);
       setError('');
     } catch (err) {
+      console.error('Failed to load orders:', err);
       setError('Failed to load orders');
+      setOrders([]);
     }
   };
 
   const loadCustomers = async () => {
     try {
       const res = await customerAPI.getAll();
-      setCustomers(res.data);
+      setCustomers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error('Failed to load customers');
+      console.error('Failed to load customers:', err);
+      setCustomers([]);
     }
   };
 
   const loadProducts = async () => {
     try {
       const res = await productAPI.getAll();
-      setProducts(res.data);
+      setProducts(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error('Failed to load products');
+      console.error('Failed to load products:', err);
+      setProducts([]);
     }
   };
 
@@ -55,7 +63,7 @@ export default function Orders() {
         items
       });
       setForm({ customer_id: '', items: [{ product_id: '', quantity: '' }] });
-      loadOrders();
+      await loadOrders();
       setError('');
     } catch (err) {
       setError(err.response?.data?.detail || 'Error creating order');
@@ -66,7 +74,7 @@ export default function Orders() {
     if (confirm('Cancel this order?')) {
       try {
         await orderAPI.delete(id);
-        loadOrders();
+        await loadOrders();
       } catch (err) {
         setError('Failed to delete order');
       }
@@ -83,6 +91,10 @@ export default function Orders() {
     setForm({ ...form, items: [...form.items, { product_id: '', quantity: '' }] });
   };
 
+  if (loading) {
+    return <div className="orders"><p>Loading...</p></div>;
+  }
+
   return (
     <div className="orders">
       <h2>Orders</h2>
@@ -95,13 +107,13 @@ export default function Orders() {
           required
         >
           <option value="">Select Customer</option>
-          {customers.map((c) => (
+          {customers && customers.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
 
         <div className="items">
-          {form.items.map((item, idx) => (
+          {form.items && form.items.map((item, idx) => (
             <div key={idx} className="item-row">
               <select
                 value={item.product_id}
@@ -109,7 +121,7 @@ export default function Orders() {
                 required
               >
                 <option value="">Select Product</option>
-                {products.map((p) => (
+                {products && products.map((p) => (
                   <option key={p.id} value={p.id}>{p.name} (${p.price})</option>
                 ))}
               </select>
@@ -140,17 +152,23 @@ export default function Orders() {
           </tr>
         </thead>
         <tbody>
-          {orders.map((o) => (
-            <tr key={o.id}>
-              <td>#{o.id}</td>
-              <td>{customers.find(c => c.id === o.customer_id)?.name}</td>
-              <td>${o.total_amount.toFixed(2)}</td>
-              <td>{o.items.length}</td>
-              <td>
-                <button onClick={() => handleDelete(o.id)}>Cancel</button>
-              </td>
+          {orders && orders.length > 0 ? (
+            orders.map((o) => (
+              <tr key={o.id}>
+                <td>#{o.id}</td>
+                <td>{customers && customers.find(c => c.id === o.customer_id)?.name || 'Unknown'}</td>
+                <td>${o.total_amount ? o.total_amount.toFixed(2) : '0.00'}</td>
+                <td>{o.items ? o.items.length : 0}</td>
+                <td>
+                  <button onClick={() => handleDelete(o.id)}>Cancel</button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5">No orders yet</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

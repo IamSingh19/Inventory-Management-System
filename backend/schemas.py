@@ -61,7 +61,16 @@ class OrderResponse(BaseModel):
     customer_id: int
     total_amount: float
     created_at: datetime
-    items: List[OrderItemResponse]
+    items: List[OrderItemResponse] = []
+    
+    class Config:
+        from_attributes = True
+
+class OrderListResponse(BaseModel):
+    id: int
+    customer_id: int
+    total_amount: float
+    created_at: datetime
     
     class Config:
         from_attributes = True

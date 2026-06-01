@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Order, OrderItem, Product, Customer
-from schemas import OrderCreate, OrderResponse
+from schemas import OrderCreate, OrderResponse, OrderListResponse
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -39,16 +39,25 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db)):
     db.refresh(db_order)
     return db_order
 
-@router.get("", response_model=list[OrderResponse])
+@router.get("")
 def get_orders(db: Session = Depends(get_db)):
-    return db.query(Order).all()
+    orders = db.query(Order).all()
+    return [{"id": o.id, "customer_id": o.customer_id, "total_amount": o.total_amount, "created_at": o.created_at} for o in orders]
 
-@router.get("/{order_id}", response_model=OrderResponse)
+@router.get("/{order_id}")
 def get_order(order_id: int, db: Session = Depends(get_db)):
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return order
+    # Force load items while session is active
+    items = [{"id": i.id, "product_id": i.product_id, "quantity": i.quantity, "price": i.price} for i in order.items]
+    return {
+        "id": order.id,
+        "customer_id": order.customer_id,
+        "total_amount": order.total_amount,
+        "created_at": order.created_at,
+        "items": items
+    }
 
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_order(order_id: int, db: Session = Depends(get_db)):
