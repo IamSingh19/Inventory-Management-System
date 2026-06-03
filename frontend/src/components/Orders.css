@@ -12,26 +12,23 @@
 
 .orders .form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: auto 1fr auto auto;
   gap: 10px;
+  align-items: flex-end;
   width: 100%;
 }
 
 .orders .form > select {
-  grid-column: span 1;
+  grid-column: 1;
 }
 
 .items {
-  margin: 15px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  margin: 0;
+  display: contents;
 }
 
 .item-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 10px;
+  display: contents;
 }
 
 .item-row select,
@@ -135,9 +132,17 @@
   .orders .form {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 8px;
+    align-items: stretch;
+  }
+
+  .items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .item-row {
+    display: grid;
     grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
     gap: 8px;
   }
@@ -162,9 +167,17 @@
   .orders .form {
     grid-template-columns: 1fr;
     gap: 10px;
+    align-items: stretch;
+  }
+
+  .items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .item-row {
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
