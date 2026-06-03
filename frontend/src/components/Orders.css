@@ -11,24 +11,42 @@
 }
 
 .orders .form {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: flex-end;
   width: 100%;
 }
 
-.orders .form > select {
-  grid-column: 1;
+.orders .form > select:first-of-type {
+  flex: 0 0 200px;
 }
 
 .items {
   margin: 0;
-  display: contents;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
 }
 
 .item-row {
-  display: contents;
+  display: flex;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 300px;
+}
+
+.item-row select {
+  flex: 2;
+}
+
+.item-row input {
+  flex: 1;
+}
+
+.orders .form button {
+  flex: 0 0 auto;
 }
 
 .item-row select,
@@ -130,21 +148,21 @@
   }
 
   .orders .form {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 8px;
-    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .orders .form > select:first-of-type {
+    flex: 1 1 100%;
   }
 
   .items {
-    display: flex;
     flex-direction: column;
-    gap: 8px;
+    width: 100%;
   }
 
   .item-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-    gap: 8px;
+    flex-direction: column;
+    min-width: 100%;
   }
 
   .item-row select,
@@ -165,27 +183,24 @@
   }
 
   .orders .form {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    align-items: stretch;
+    flex-direction: column;
   }
 
   .items {
-    display: flex;
     flex-direction: column;
-    gap: 10px;
+    width: 100%;
   }
 
   .item-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    flex-direction: column;
+    min-width: 100%;
   }
 
   .item-row select,
   .item-row input {
     height: 40px;
     font-size: 1rem;
+    width: 100%;
   }
 
   .details-header {
