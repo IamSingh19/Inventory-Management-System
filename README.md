@@ -62,11 +62,11 @@ npm run dev
 
 ## Deployment Links
 
-- GitHub Repository: https://github.com/IamSingh19/etharaAi-project
-- Live Frontend: replace with your public Vercel/Netlify app URL
+- GitHub Repository: https://github.com/IamSingh19/Inventory-Management-System
+- Live Frontend: https://inventory-management-system-lovat-delta.vercel.app
 - Live Backend API: https://inventory-management-sys-b6po.onrender.com
 - Live API Docs: https://inventory-management-sys-b6po.onrender.com/docs
-- Docker Hub Backend Image: replace with your Docker Hub backend image URL
+- Docker Hub Backend Image: https://hub.docker.com/r/iamsingh1906/inventory-backend
 
 ## API Endpoints
 
